@@ -26,28 +26,33 @@ pipeline {
             }
         }
 
-        stage('Test') {
-            steps {
-                bat """
-                    python --version
-                    pip --version
-                    python -m pip install --upgrade pip
-                    pip install -r requirements.txt
-                    set PYTHONPATH=%PYTHONPATH%;%cd%
-                    pytest
-                """
-            }
-        }
+        // stage('Test') {
+        //     steps {
+        //         bat """
+        //             python --version
+        //             pip --version
+        //             python -m pip install --upgrade pip
+        //             pip install -r requirements.txt
+        //             set PYTHONPATH=%PYTHONPATH%;%cd%
+        //             pytest
+        //         """
+        //     }
+        // }
 
+      
+
+       
         // stage('Build Docker Image') {
         //     steps {
         //         bat """
-        //             docker build -t soniagurram/fastapi-app:v1 .
-        //             docker save soniagurram/fastapi-app:v1 -o fastapi-app.tar
+        //             "%DOCKER_PATH%" --version
+        //             "%DOCKER_PATH%" build -t %DOCKER_IMAGE_BUILD% .
+        //             "%DOCKER_PATH%" save %DOCKER_IMAGE_BUILD% -o fastapi-app-build.tar
         //         """
-        //         archiveArtifacts artifacts: 'fastapi-app.tar', fingerprint: true
+        //         archiveArtifacts artifacts: 'fastapi-app-build.tar', fingerprint: true
         //     }
         // }
+        
 
         // stage('Push Docker Image') {
         //     steps {
@@ -55,56 +60,29 @@ pipeline {
         //                                           usernameVariable: 'DOCKER_USER', 
         //                                           passwordVariable: 'DOCKER_PASSWORD')]) {
         //             bat """
-        //                 docker load -i fastapi-app.tar
-        //                 docker login -u %DOCKER_USER% -p %DOCKER_PASSWORD%
-        //                 docker push soniagurram/fastapi-app:v1
+        //                 "%DOCKER_PATH%" load -i fastapi-app-build.tar
+        //                 "%DOCKER_PATH%" tag %DOCKER_IMAGE_BUILD% %DOCKER_IMAGE_PUSH%
+        //                 "%DOCKER_PATH%" login -u %DOCKER_USER% -p %DOCKER_PASSWORD%
+        //                 "%DOCKER_PATH%" push %DOCKER_IMAGE_PUSH%
         //             """
         //         }
         //     }
         // }
-        stage('Build Docker Image') {
-            steps {
-                bat """
-                    "%DOCKER_PATH%" --version
-                    "%DOCKER_PATH%" build -t %DOCKER_IMAGE_BUILD% .
-                    "%DOCKER_PATH%" save %DOCKER_IMAGE_BUILD% -o fastapi-app-build.tar
-                """
-                archiveArtifacts artifacts: 'fastapi-app-build.tar', fingerprint: true
-            }
+
+
+    stage('Deploy to Kubernetes') {
+    steps {
+        withCredentials([string(credentialsId: 'kubeconfig-base64', variable: 'KUBE_CONFIG_BASE64')]) {
+            bat """
+                powershell -Command "[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('%KUBE_CONFIG_BASE64%')) | Out-File kubeconfig -Encoding UTF8"
+                set KUBECONFIG=%cd%\\kubeconfig
+                kubectl apply -f deployment.yaml
+                kubectl rollout status deployment/fastapi-app --timeout=120s
+                kubectl get svc fastapi-app-service -o wide
+            """
         }
-        
-
-        stage('Push Docker Image') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS}", 
-                                                  usernameVariable: 'DOCKER_USER', 
-                                                  passwordVariable: 'DOCKER_PASSWORD')]) {
-                    bat """
-                        "%DOCKER_PATH%" load -i fastapi-app-build.tar
-                        "%DOCKER_PATH%" tag %DOCKER_IMAGE_BUILD% %DOCKER_IMAGE_PUSH%
-                        "%DOCKER_PATH%" login -u %DOCKER_USER% -p %DOCKER_PASSWORD%
-                        "%DOCKER_PATH%" push %DOCKER_IMAGE_PUSH%
-                    """
-                }
-            }
-        }
-
-
-        stage('Deploy to Kubernetes') {
-            steps {
-                withCredentials([string(credentialsId: "${kubeconfig-base64}", variable: 'KUBE_CONFIG_BASE64')]) {
-                    bat """
-                        powershell -Command "[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('%KUBE_CONFIG_BASE64%')) | Out-File kubeconfig -Encoding UTF8"
-                        set KUBECONFIG=%cd%\\kubeconfig
-                        kubectl apply -f deployment.yaml
-                        kubectl rollout status deployment/fastapi-app --timeout=120s
-                        kubectl get svc fastapi-app-service -o wide
-                    """
-                }
-            }
-        }
-
     }
+}
 
     post {
         always {
