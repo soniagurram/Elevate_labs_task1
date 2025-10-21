@@ -23,45 +23,84 @@ jobs:
         run: |
           export PYTHONPATH=$PYTHONPATH:$(pwd)
           pytest
-
-  
   build:
     runs-on: ubuntu-latest
     needs: test
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Validate DockerHub username
-        run: |
-          DOCKERHUB_USERNAME="soniagurram"
-          if [ -z "$DOCKERHUB_USERNAME" ]; then
-            echo "ERROR: DOCKERHUB_USERNAME is not set.";
-            exit 1;
-          fi
-      - name: Build Docker image
-        run: |
-          DOCKERHUB_USERNAME="soniagurram"
-          IMAGE_TAG="$DOCKERHUB_USERNAME/fastapi-app:latest"
-          echo "Building image $IMAGE_TAG"
-          docker build -t "$DOCKERHUB_USERNAME/fastapi-app:latest" .
-        
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Build Docker image
+      run: |
+        docker build -t soniagurram/fastapi-app:latest .
+    - name: Save image as tar
+      run: |
+        docker save soniagurram/fastapi-app:latest -o fastapi-app.tar
+    - name: Upload image artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: fastapi-image
+        path: fastapi-app.tar
+
   push:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Log in to DockerHub
-        run: |
-          DOCKERHUB_USERNAME="soniagurram"
-          DOCKERHUB_PASSWORD="Sonia@77281"
-          echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-      - name: Push Docker image
-        run: |
-          DOCKERHUB_USERNAME="soniagurram"
-          IMAGE_TAG="$DOCKERHUB_USERNAME/fastapi-app:latest"
-          echo "Pushing $IMAGE_TAG"
-          docker push "$IMAGE_TAG"
+   runs-on: ubuntu-latest
+   needs: build
+   steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Download image artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: fastapi-image
+    - name: Load image
+      run: docker load -i fastapi-app.tar
+    - name: Log in to DockerHub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+    - name: Push Docker image
+      run: docker push soniagurram/fastapi-app:latest
+
+ 
+
+  
+  # build2:
+  #   runs-on: ubuntu-latest
+  #   needs: test
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
+  #     - name: Validate DockerHub username
+  #       run: |
+  #         DOCKERHUB_USERNAME="soniagurram"
+  #         if [ -z "$DOCKERHUB_USERNAME" ]; then
+  #           echo "ERROR: DOCKERHUB_USERNAME is not set.";
+  #           exit 1;
+  #         fi
+  #     - name: Build Docker image
+  #       run: |
+  #         DOCKERHUB_USERNAME="soniagurram"
+  #         IMAGE_TAG="$DOCKERHUB_USERNAME/fastapi-app:latest"
+  #         echo "Building image $IMAGE_TAG"
+  #         docker build -t "$DOCKERHUB_USERNAME/fastapi-app:latest" .
+        
+  # push2:
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
+  #     - name: Log in to DockerHub
+  #       run: |
+  #         DOCKERHUB_USERNAME="soniagurram"
+  #         DOCKERHUB_PASSWORD="Sonia@77281"
+  #         echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+  #     - name: Push Docker image
+  #       run: |
+  #         DOCKERHUB_USERNAME="soniagurram"
+  #         IMAGE_TAG="$DOCKERHUB_USERNAME/fastapi-app:latest"
+  #         echo "Pushing $IMAGE_TAG"
+  #         docker push "$IMAGE_TAG"
    
   
 
