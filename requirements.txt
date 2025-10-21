@@ -6,3 +6,4 @@ flask>=2.2,<3
 pydantic>=1.10.0
 python-dotenv>=0.21.0
 pytest>=7.0.0
+flask-cors==3.1.1
