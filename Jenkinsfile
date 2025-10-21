@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_USERNAME = credentials('dockerhub-username') // Jenkins secret
+        DOCKERHUB_USERNAME = credentials('dockerhub_username') // Jenkins secret
         DOCKERHUB_PASSWORD = credentials('dockerhub-password') // Jenkins secret
         KUBE_CONFIG_BASE64 = credentials('kubeconfig-base64')  // Jenkins secret
         PYTHONPATH = "${env.WORKSPACE}"
