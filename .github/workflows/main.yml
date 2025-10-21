@@ -103,8 +103,29 @@ jobs:
   #         docker push "$IMAGE_TAG"
    
   
-
   deploy:
+    runs-on: [self-hosted, Windows, X64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.30.0'   # specify the version you want
+
+      - name: Configure kubeconfig
+        env:
+          KUBE_CONFIG_BASE64: ${{ secrets.KUBE_CONFIG_BASE64 }}
+        run: |
+          echo "$env:KUBE_CONFIG_BASE64" | Out-File kubeconfig.base64
+          [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String((Get-Content kubeconfig.base64))) | Out-File kubeconfig
+          $env:KUBECONFIG = "$PWD\kubeconfig"
+
+      - name: Deploy manifests
+        run: |
+          kubectl apply -f deployment.yaml
+  deploy2:
     #runs-on: ubuntu-latest
     needs: push
     runs-on: self-hosted
