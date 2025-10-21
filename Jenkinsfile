@@ -72,15 +72,14 @@ pipeline {
 
     stage('Deploy to Kubernetes') {
     steps {
-        withCredentials([string(credentialsId: 'kube', variable: 'KUBE_CONFIG_BASE64')]) {
-            bat """
-                powershell -Command "[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('%KUBE_CONFIG_BASE64%')) | Out-File kubeconfig -Encoding UTF8"
-                set KUBECONFIG=%cd%\\kubeconfig
-                kubectl apply -f deployment.yaml
-                kubectl rollout status deployment/fastapi-app --timeout=120s
-                kubectl get svc fastapi-app-service -o wide
-            """
-        }
+withCredentials([file(credentialsId: 'kube', variable: 'KUBE_CONFIG_FILE')]) {
+    bat """
+        set KUBECONFIG=%KUBE_CONFIG_FILE%
+        kubectl apply -f deployment.yaml
+        kubectl rollout status deployment/fastapi-app --timeout=120s
+        kubectl get svc fastapi-app-service -o wide
+    """
+} 
     }
 }
     }
