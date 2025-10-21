@@ -27,48 +27,48 @@ pipeline {
             }
         }
 
-        // stage('Test') {
-        //     steps {
-        //         bat """
-        //             python --version
-        //             pip --version
-        //             python -m pip install --upgrade pip
-        //             pip install -r requirements.txt
-        //             set PYTHONPATH=%PYTHONPATH%;%cd%
-        //             pytest
-        //         """
-        //     }
-        // }
+        stage('Test') {
+            steps {
+                bat """
+                    python --version
+                    pip --version
+                    python -m pip install --upgrade pip
+                    pip install -r requirements.txt
+                    set PYTHONPATH=%PYTHONPATH%;%cd%
+                    pytest
+                """
+            }
+        }
 
       
 
        
-        // stage('Build Docker Image') {
-        //     steps {
-        //         bat """
-        //             "%DOCKER_PATH%" --version
-        //             "%DOCKER_PATH%" build -t %DOCKER_IMAGE_BUILD% .
-        //             "%DOCKER_PATH%" save %DOCKER_IMAGE_BUILD% -o fastapi-app-build.tar
-        //         """
-        //         archiveArtifacts artifacts: 'fastapi-app-build.tar', fingerprint: true
-        //     }
-        // }
+        stage('Build Docker Image') {
+            steps {
+                bat """
+                    "%DOCKER_PATH%" --version
+                    "%DOCKER_PATH%" build -t %DOCKER_IMAGE_BUILD% .
+                    "%DOCKER_PATH%" save %DOCKER_IMAGE_BUILD% -o fastapi-app-build.tar
+                """
+                archiveArtifacts artifacts: 'fastapi-app-build.tar', fingerprint: true
+            }
+        }
         
 
-        // stage('Push Docker Image') {
-        //     steps {
-        //         withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS}", 
-        //                                           usernameVariable: 'DOCKER_USER', 
-        //                                           passwordVariable: 'DOCKER_PASSWORD')]) {
-        //             bat """
-        //                 "%DOCKER_PATH%" load -i fastapi-app-build.tar
-        //                 "%DOCKER_PATH%" tag %DOCKER_IMAGE_BUILD% %DOCKER_IMAGE_PUSH%
-        //                 "%DOCKER_PATH%" login -u %DOCKER_USER% -p %DOCKER_PASSWORD%
-        //                 "%DOCKER_PATH%" push %DOCKER_IMAGE_PUSH%
-        //             """
-        //         }
-        //     }
-        // }
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS}", 
+                                                  usernameVariable: 'DOCKER_USER', 
+                                                  passwordVariable: 'DOCKER_PASSWORD')]) {
+                    bat """
+                        "%DOCKER_PATH%" load -i fastapi-app-build.tar
+                        "%DOCKER_PATH%" tag %DOCKER_IMAGE_BUILD% %DOCKER_IMAGE_PUSH%
+                        "%DOCKER_PATH%" login -u %DOCKER_USER% -p %DOCKER_PASSWORD%
+                        "%DOCKER_PATH%" push %DOCKER_IMAGE_PUSH%
+                    """
+                }
+            }
+        }
 
 
     stage('Deploy to Kubernetes') {
