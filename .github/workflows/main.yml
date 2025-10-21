@@ -132,7 +132,7 @@ jobs:
 
       - name: Deploy manifests
         run: |
-          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f deployment.yaml
 
       - name: Verify rollout
         run: |
