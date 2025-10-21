@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from app.models import EmployeeCreate, EmployeeOut, EmployeeUpdate
 from app.database import MONGODB_URI, DB_NAME
@@ -6,7 +7,18 @@ from bson import ObjectId
 from typing import List
 
 app = FastAPI(title="Company API")
+origins = [
+    "http://localhost:5000",  # your frontend origin
+    "http://localhost:5001",  # if you run frontend on another port
+    "*",  # optional, allow all origins (use with caution in production)
+]
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # can be ["*"] to allow all
+    allow_credentials=True,
+    allow_methods=["*"],    # allow all HTTP methods
+    allow_headers=["*"], 
 @app.on_event("startup")
 async def startup_db_client():
     app.mongodb_client = AsyncIOMotorClient(MONGODB_URI)
