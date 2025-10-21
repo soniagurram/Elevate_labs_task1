@@ -10,6 +10,7 @@ pipeline {
         DOCKER_PATH = 'C:\\Users\\sonia\\AppData\\Local\\Programs\\Rancher Desktop\\resources\\resources\\win32\\bin\\docker.exe'
         DOCKER_IMAGE_BUILD = 'soniagurram/fastapi-app:v1'
         DOCKER_IMAGE_PUSH = 'soniagurram/fastapi-app:v1'
+        KUBECTL_PATH = 'C:\\Users\\sonia\\AppData\\Local\\Programs\\Rancher Desktop\\resources\\resources\\win32\\bin\\kubectl.exe'
     }
 
     stages {
@@ -75,9 +76,9 @@ pipeline {
 withCredentials([file(credentialsId: 'kube', variable: 'KUBE_CONFIG_FILE')]) {
     bat """
         set KUBECONFIG=%KUBE_CONFIG_FILE%
-        kubectl apply -f deployment.yaml
-        kubectl rollout status deployment/fastapi-app --timeout=120s
-        kubectl get svc fastapi-app-service -o wide
+        "%KUBECTL_PATH%" apply -f deployment.yaml
+        "%KUBECTL_PATH%" rollout status deployment/fastapi-app --timeout=120s
+        "%KUBECTL_PATH%" get svc fastapi-app-service -o wide
     """
 } 
     }
