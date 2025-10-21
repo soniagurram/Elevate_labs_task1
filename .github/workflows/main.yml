@@ -135,7 +135,20 @@ jobs:
           ls -l $GITHUB_WORKSPACE
           echo "First few lines of kubeconfig:"
           head -n 15 $GITHUB_WORKSPACE/kubeconfig
+      - name: Verify cluster access
+        run: |
+          kubectl config view
+          kubectl cluster-info
+          kubectl get nodes
+        env:
+         KUBECONFIG: $GITHUB_WORKSPACE/kubeconfig
+
       - name: Deploy manifests
+        run: |
+          kubectl apply -f deployment.yaml
+        env:
+           KUBECONFIG:  $GITHUB_WORKSPACE/kubeconfig
+      - name: Deploy manifests2
         run: |
           kubectl apply -f deployment.yaml
 
