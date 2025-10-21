@@ -7,6 +7,7 @@ pipeline {
         GITHUB_REPO = 'https://github.com/soniagurram/Elevate_labs_task1.git'
         PYTHON_HOME = 'C:\\Users\\sonia\\AppData\\Local\\Programs\\Python\\Python312'
         PATH = "${env.PYTHON_HOME};${env.PYTHON_HOME}\\Scripts;${env.PATH}"
+        DOCKER_PATH = 'C:\\Users\\sonia\\AppData\\Local\\Programs\\Rancher Desktop\\resources\\resources\\win32\\bin\\docker.exe'
     }
 
     stages {
@@ -36,13 +37,37 @@ pipeline {
             }
         }
 
+        // stage('Build Docker Image') {
+        //     steps {
+        //         bat """
+        //             docker build -t soniagurram/fastapi-app:v1 .
+        //             docker save soniagurram/fastapi-app:v1 -o fastapi-app.tar
+        //         """
+        //         archiveArtifacts artifacts: 'fastapi-app.tar', fingerprint: true
+        //     }
+        // }
+
+        // stage('Push Docker Image') {
+        //     steps {
+        //         withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS}", 
+        //                                           usernameVariable: 'DOCKER_USER', 
+        //                                           passwordVariable: 'DOCKER_PASSWORD')]) {
+        //             bat """
+        //                 docker load -i fastapi-app.tar
+        //                 docker login -u %DOCKER_USER% -p %DOCKER_PASSWORD%
+        //                 docker push soniagurram/fastapi-app:v1
+        //             """
+        //         }
+        //     }
+        // }
         stage('Build Docker Image') {
             steps {
                 bat """
-                    docker build -t soniagurram/fastapi-app:v1 .
-                    docker save soniagurram/fastapi-app:v1 -o fastapi-app.tar
+                    "%DOCKER_PATH%" --version
+                    "%DOCKER_PATH%" build -t %DOCKER_IMAGE_BUILD% .
+                    "%DOCKER_PATH%" save %DOCKER_IMAGE_BUILD% -o fastapi-app-build.tar
                 """
-                archiveArtifacts artifacts: 'fastapi-app.tar', fingerprint: true
+                archiveArtifacts artifacts: 'fastapi-app-build.tar', fingerprint: true
             }
         }
 
@@ -52,13 +77,15 @@ pipeline {
                                                   usernameVariable: 'DOCKER_USER', 
                                                   passwordVariable: 'DOCKER_PASSWORD')]) {
                     bat """
-                        docker load -i fastapi-app.tar
-                        docker login -u %DOCKER_USER% -p %DOCKER_PASSWORD%
-                        docker push soniagurram/fastapi-app:v1
+                        "%DOCKER_PATH%" load -i fastapi-app-build.tar
+                        "%DOCKER_PATH%" tag %DOCKER_IMAGE_BUILD% %DOCKER_IMAGE_PUSH%
+                        "%DOCKER_PATH%" login -u %DOCKER_USER% -p %DOCKER_PASSWORD%
+                        "%DOCKER_PATH%" push %DOCKER_IMAGE_PUSH%
                     """
                 }
             }
         }
+
 
         stage('Deploy to Kubernetes') {
             steps {
