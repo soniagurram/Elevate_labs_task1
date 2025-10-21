@@ -8,8 +8,8 @@ pipeline {
         PYTHON_HOME = 'C:\\Users\\sonia\\AppData\\Local\\Programs\\Python\\Python312'
         PATH = "${env.PYTHON_HOME};${env.PYTHON_HOME}\\Scripts;${env.PATH}"
         DOCKER_PATH = 'C:\\Users\\sonia\\AppData\\Local\\Programs\\Rancher Desktop\\resources\\resources\\win32\\bin\\docker.exe'
-        DOCKER_IMAGE_BUILD = 'soniagurram/fastapi-app:v1'
-        DOCKER_IMAGE_PUSH = 'soniagurram/fastapi-app:v1'
+        DOCKER_IMAGE_BUILD = 'soniagurram/fastapi-app:v2'
+        DOCKER_IMAGE_PUSH = 'soniagurram/fastapi-app:v2'
         KUBECTL_PATH = 'C:\\Users\\sonia\\AppData\\Local\\Programs\\Rancher Desktop\\resources\\resources\\win32\\bin\\kubectl.exe'
     }
 
