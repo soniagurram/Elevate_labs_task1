@@ -129,7 +129,12 @@ jobs:
             echo "KUBE_CONFIG_BASE64 is not set. If deploying to a local Rancher Desktop cluster, run this workflow on a self-hosted runner that has cluster access or set the KUBE_CONFIG_BASE64 secret.";
             exit 1
           fi
-
+      - name: Verify kubeconfig file
+        run: |
+          echo "Checking kubeconfig..."
+          ls -l $GITHUB_WORKSPACE
+          echo "First few lines of kubeconfig:"
+          head -n 15 $GITHUB_WORKSPACE/kubeconfig
       - name: Deploy manifests
         run: |
           kubectl apply -f deployment.yaml
