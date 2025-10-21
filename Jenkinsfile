@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        // Replace these with the IDs of the credentials you added in Jenkins
         DOCKERHUB_CREDENTIALS = 'dockerhub-credentials-id'
         KUBECONFIG_SECRET = 'kubeconfig-base64'
         GITHUB_REPO = 'https://github.com/soniagurram/Elevate_labs_task1.git'
@@ -12,7 +11,7 @@ pipeline {
 
         stage('Clean Workspace') {
             steps {
-                cleanWs() // Remove old files in workspace
+                cleanWs()
             }
         }
 
@@ -25,8 +24,8 @@ pipeline {
         stage('Test') {
             steps {
                 bat """
-                   'python --version'
-                   'pip --version'
+                    python --version
+                    pip --version
                     python -m pip install --upgrade pip
                     pip install -r requirements.txt
                     set PYTHONPATH=%PYTHONPATH%;%cd%
@@ -54,7 +53,7 @@ pipeline {
                         docker load -i fastapi-app.tar
                         docker login -u %DOCKER_USER% -p %DOCKER_PASSWORD%
                         docker push soniagurram/fastapi-app:v1
-                    ""
+                    """
                 }
             }
         }
@@ -63,7 +62,7 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: "${KUBECONFIG_SECRET}", variable: 'KUBE_CONFIG_BASE64')]) {
                     bat """
-                        powershell -Command "[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('%KUBE_CONFIG_BASE64%')) | Out-File kubeconfig"
+                        powershell -Command "[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('%KUBE_CONFIG_BASE64%')) | Out-File kubeconfig -Encoding UTF8"
                         set KUBECONFIG=%cd%\\kubeconfig
                         kubectl apply -f deployment.yaml
                         kubectl rollout status deployment/fastapi-app --timeout=120s
