@@ -38,8 +38,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 bat """
-                    docker build -t soniagurram/fastapi-app:latest .
-                    docker save soniagurram/fastapi-app:latest -o fastapi-app.tar
+                    docker build -t soniagurram/fastapi-app:v1 .
+                    docker save soniagurram/fastapi-app:v1 -o fastapi-app.tar
                 """
                 archiveArtifacts artifacts: 'fastapi-app.tar', fingerprint: true
             }
@@ -53,8 +53,8 @@ pipeline {
                     bat """
                         docker load -i fastapi-app.tar
                         docker login -u %DOCKER_USER% -p %DOCKER_PASSWORD%
-                        docker push soniagurram/fastapi-app:latest
-                    """
+                        docker push soniagurram/fastapi-app:v1
+                    ""
                 }
             }
         }
