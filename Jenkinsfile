@@ -8,6 +8,7 @@ pipeline {
         PYTHON_HOME = 'C:\\Users\\sonia\\AppData\\Local\\Programs\\Python\\Python312'
         PATH = "${env.PYTHON_HOME};${env.PYTHON_HOME}\\Scripts;${env.PATH}"
         DOCKER_PATH = 'C:\\Users\\sonia\\AppData\\Local\\Programs\\Rancher Desktop\\resources\\resources\\win32\\bin\\docker.exe'
+        DOCKER_IMAGE_BUILD = 'soniagurram/fastapi-app:v1'
     }
 
     stages {
@@ -70,6 +71,7 @@ pipeline {
                 archiveArtifacts artifacts: 'fastapi-app-build.tar', fingerprint: true
             }
         }
+        
 
         stage('Push Docker Image') {
             steps {
