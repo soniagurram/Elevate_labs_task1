@@ -61,7 +61,7 @@ jobs:
           DOCKERHUB_USERNAME="soniagurram"
           IMAGE_TAG="$DOCKERHUB_USERNAME/fastapi-app:latest"
           echo "Pushing $IMAGE_TAG"
-          docker push "docker.io/soniagurram/fastapi-app:latest"
+          docker push "IMAGE_TAG"
    
   
 
