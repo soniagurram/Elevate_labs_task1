@@ -92,7 +92,7 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                withCredentials([string(credentialsId: "${KUBECONFIG_SECRET}", variable: 'KUBE_CONFIG_BASE64')]) {
+                withCredentials([string(credentialsId: "${kubeconfig-base64}", variable: 'KUBE_CONFIG_BASE64')]) {
                     bat """
                         powershell -Command "[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('%KUBE_CONFIG_BASE64%')) | Out-File kubeconfig -Encoding UTF8"
                         set KUBECONFIG=%cd%\\kubeconfig
