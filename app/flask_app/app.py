@@ -1,11 +1,10 @@
-from flask import Flask, jsonify, request, abort
-from flask_cors import CORS  # ✅ import CORS     
+from flask import Flask, jsonify, request, abor     
 from pymongo import MongoClient
 from app.common import db as db_conf
 from bson import ObjectId
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5001"], supports_credentials=True)
+
 
 client = MongoClient(db_conf.MONGODB_URI)
 database = client[db_conf.DB_NAME]
