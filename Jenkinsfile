@@ -5,6 +5,8 @@ pipeline {
         DOCKERHUB_CREDENTIALS = 'dockerhub-credentials-id'
         KUBECONFIG_SECRET = 'kubeconfig-base64'
         GITHUB_REPO = 'https://github.com/soniagurram/Elevate_labs_task1.git'
+        PYTHON_HOME = 'C:\\Users\\sonia\\AppData\\Local\\Programs\\Python\\Python312'
+        PATH = "${env.PYTHON_HOME};${env.PYTHON_HOME}\\Scripts;${env.PATH}"
     }
 
     stages {
