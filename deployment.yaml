@@ -16,7 +16,8 @@ spec:
     spec:
       containers:
         - name: fastapi-app
-          image: my-docker-username/fastapi-app:latest
+          image: soniagurram/fastapi-app:latest
+
           ports:
             - containerPort: 8000
           env:
